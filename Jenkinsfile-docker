@@ -23,26 +23,24 @@ pipeline {
       steps {
         sh 'mvn test'
       }
-    }
-    stage('Build Docker Image') {
       agent any
       steps {
-        sh 'docker image build -t testMaven .'
+        sh 'docker image build -t test-maven .'
       }
     }
     stage('Tag Docker Image') {
       agent any
       steps {
-        sh 'docker image tag testMaven aerinjeong/testMaven:latest'
-        sh 'docker image tag testMaven aerinjeong/testMaven:$BUILD_NUMBER'
+        sh 'docker image tag testMaven aerinjeong/test-maven:latest'
+        sh 'docker image tag testMaven aerinjeong/test-maven:$BUILD_NUMBER'
       }
     }
     stage('Publish Docker Image') {
       agent any
       steps {
         withDockerRegistry(credentialsId: 'docker-hub-token', url: 'https://index.docker.io/v1/') {
-          sh 'docker image push aerinjeong/testMaven:latest'
-          sh 'docker image push aerinjeong/testMaven:$BUILD_NUMBER'
+          sh 'docker image push aerinjeong/test-maven:latest'
+          sh 'docker image push aerinjeong/test-maven:$BUILD_NUMBER'
         }
       }
     }
@@ -51,7 +49,7 @@ pipeline {
         docker { image 'docker:dind' }
       }
       steps {
-        sh 'docker -H tcp://172.31.28.247:2375 container run --detach --name test_maven -p 80:8080 aerinjeong/testMaven:$BUILD_NUMBER'
+        sh 'docker -H tcp://172.31.28.247:2375 container run --detach --name test_maven -p 80:8080 aerinjeong/test-maven:$BUILD_NUMBER'
       }
     }
   }
