@@ -5,7 +5,7 @@ pipeline {
     stage('Checkout') {
       agent any
       steps {
-        git branch: 'main', url: '<URL>'
+        git branch: 'main', url: 'https://github.com/AerinJeong/source-maven-java-spring-hello-webapp.git'
       }
     }
     stage('Build') {
@@ -33,14 +33,16 @@ pipeline {
     stage('Tag Docker Image') {
       agent any
       steps {
-        sh 'docker image tag testMaven aerinjeong/testMaven'
+        sh 'docker image tag testMaven aerinjeong/testMaven:latest'
+        sh 'docker image tag testMaven aerinjeong/testMaven:$BUILD_NUMBER'
       }
     }
     stage('Publish Docker Image') {
       agent any
       steps {
         withDockerRegistry(credentialsId: 'docker-hub-token', url: 'https://index.docker.io/v1/') {
-          sh 'docker image push aerinjeong/testMaven'
+          sh 'docker image push aerinjeong/testMaven:latest'
+          sh 'docker image push aerinjeong/testMaven:$BUILD_NUMBER'
         }
       }
     }
@@ -49,7 +51,7 @@ pipeline {
         docker { image 'docker:dind' }
       }
       steps {
-        sh 'docker -H tcp://3.38.197.237:2375 container run --detach --name test_maven -p 80:8080 aerinjeong/testMaven:$BUILD_NUMBER'
+        sh 'docker -H tcp://172.31.28.247:2375 container run --detach --name test_maven -p 80:8080 aerinjeong/testMaven:$BUILD_NUMBER'
       }
     }
   }
